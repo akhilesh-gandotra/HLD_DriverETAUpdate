@@ -38,3 +38,29 @@ Follow ups:
 Answer: Except for the network changes, there can be scenarios where the driver have put the app in the background/may be he received some call. During these times, we will need to activate Background Tasks. 
 We can define one Bg Task which can do the same logic of calling the ETA API in the background. When the driver returns to the foreground, we can kill the bg task and resume our normal operation.
 
+# Result
+
+✅ Pros
+
+| Aspect                        | Strength                                                                                                  |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 🔋 **Battery Efficiency**     | Smart use of `significantLocationChange` avoids constant GPS + API hits. Excellent for city environments. |
+| 🌐 **Network Efficiency**     | Reduces unnecessary requests (when driver is stationary or stuck in traffic).                             |
+| 🧠 **Intelligent Throttling** | ETA is only recalculated when there's meaningful movement. Avoids wasteful computation.                   |
+| ⚙️ **Scalability**             | API polling every 10s per driver is reasonable at scale, especially with suppression logic.               |
+| 🚫 **Socket Avoidance**       | Avoiding persistent sockets simplifies architecture and saves mobile + backend resources.                 |
+| 📱 **Good UX**                | UI parsing async = smooth user experience. Network banners = clear user communication.                    |
+| 🔄 **Resilience**             | Automatic retries during network failures = good offline/poor connectivity support.                       |
+
+
+⚠️ Cons & Caveats
+| Concern                                                         | Notes                                                                                                                                                             |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 📉 **Missed ETA update in high-speed scenarios**                | If a driver moves fast (e.g., 80km/h highway), 10s interval might result in bigger ETA jumps — you could adjust polling based on speed.                           |
+| 📶 **Network detection isn’t perfect**                          | Even with retry logic, intermittent drops may delay updates unless you're monitoring reachability continuously.                                                   |
+| 🛑 **SignificantLocationChange ≠ Small but Relevant Movements** | It's coarse-grained (500m+) — you may **miss updates** if the ETA changes within that range (e.g., new traffic jam just 200m ahead).                              |
+| ❄️ **App in suspended state**                                    | If iOS suspends the app and significant location updates don’t fire, no polling happens — might require fallback like silent push or local notification reminder. |
+| 🤖 **Complex state management**                                 | Implementing suppression logic + retries + reachability + UI update queues adds complexity that must be tested thoroughly.                                        |
+
+
+
