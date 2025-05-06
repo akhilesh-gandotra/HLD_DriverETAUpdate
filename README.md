@@ -34,4 +34,7 @@ Follow ups:
 - How do you handle the low network scenarios?
 - How many times should retry take place? 
   Answer: That depends on the api timeout, usually in a good network the call should respond within 1-2s, Lets keep the time out interval as 5s, so based on that we can have max of 1 retry as after that, it will be time for the next API call.
+- Think from a customer perspective who is waiting for the order. What else would you add in the above approach so that the eta on the customer(not driver) is always updating and not stuck. Can you list any scenarios where the eta call does not happen?
+Answer: Except for the network changes, there can be scenarios where the driver have put the app in the background/may be he received some call. During these times, we will need to activate Background Tasks. 
+We can define one Bg Task which can do the same logic of calling the ETA API in the background. When the driver returns to the foreground, we can kill the bg task and resume our normal operation.
 
